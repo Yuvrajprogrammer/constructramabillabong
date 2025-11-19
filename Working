@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sustainability Quest</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+  *{box-sizing: border-box;}
+  html,body {
+    margin:0; padding:0; height:100%;
+    font-family:'Comfortaa', cursive, Arial, sans-serif;
+    user-select:none;
+    background:linear-gradient(135deg,#00897b,#004d40);
+    color:#d0f0d0;
+  }
+  .background{position:fixed;top:0;left:0;width:100vw;height:100vh;
+    background:radial-gradient(circle at center,#4caf5080 0%,transparent 80%),
+    url("https://cdn.pixabay.com/photo/2018/05/09/13/12/leaf-3389023_1280.png") no-repeat center;
+    background-size:250px 250px;animation:driftLeaves 30s linear infinite;z-index:-10;
+    filter:drop-shadow(0 0 10px #aeeaae99);}
+  @keyframes driftLeaves{0%{background-position:center 0,center 0;}
+    50%{background-position:center 50px,center 30px;}
+    100%{background-position:center 0,center 0;}}
+  .container{max-width:490px;margin:4vh auto 6vh;background:rgba(0,68,34,0.78);border-radius:30px;
+    box-shadow:0 0 32px #1bd759cc inset;padding:30px 40px 40px;position:relative;min-height:720px;}
+  h1{text-align:center;font-size:2.8rem;color:#a8f0a4;margin-bottom:22px;text-shadow:0 2px 3px #083713cc;}
+  h2{text-align:center;font-weight:700;margin-bottom:15px;color:#d0f0d0;text-shadow:0 1px 2px #082b12cc;}
+  .progress-track{text-align:center;margin-bottom:24px;}
+  .progress-bubble{display:inline-block;width:22px;height:22px;margin:0 5px 0 5px;border-radius:50%;
+    border:2.5px solid #15b668;background:#bcffe3;box-shadow:0 0 10px #66e3b0e6;
+    transition:background 0.3s,box-shadow 0.3s;}
+  .progress-bubble.active,.progress-bubble.completed{
+    background:linear-gradient(135deg,#12df91 85%,#fff780 100%);
+    box-shadow:0 0 18px #08de7e,0 0 32px #fff457b2;border-width:2.5px;}
+  button{background:linear-gradient(90deg,#45e7bc,#b2ff59 65%);color:#1e5238;font-size:1.16rem;
+    border-radius:18px;padding:14px 42px;font-family:inherit;font-weight:700;margin:15px 0 0;
+    box-shadow:0 4px 16px #bbf8d6bb inset;border:none;cursor:pointer;transition:transform 0.14s,box-shadow 0.2s;}
+  button:disabled{background:#78b48a;cursor:not-allowed;box-shadow:none;}
+  button:hover:not(:disabled){
+    box-shadow:0 0 26px #4afc90ee,0 10px 32px #fff;transform:scale(1.1) rotate(-1.5deg);}
+  .message{font-size:1.22rem;text-align:center;padding:13px 14px;margin:10px auto 10px auto;
+    border:2px solid #3cb371;border-radius:18px;width:90%;max-width:425px;
+    background:#18612a9b;box-shadow:0 0 18px #1aea5b66 inset;color:#c0f9bb;}
+  .fact-box{margin-top:18px;background:#2a5e2bce;font-style:italic;padding:10px 14px;border-radius:16px;
+    box-shadow:inset0 0 14px #4caf5075;color:#c7f7b7;max-width:440px;margin-left:auto;
+    margin-right:auto;min-height:52px;}
+  .correct{color:#32e432;font-weight:700;}.incorrect{color:#e64747;font-weight:700;}
+  .maze{display:grid;grid-template-columns:repeat(6,52px);grid-template-rows:repeat(12,52px);gap:5px;
+    margin:11px auto 32px;perspective:1200px;}
+  .cell{width:52px;height:52px;border-radius:9px;background:#a3d9a5;
+    border:1px solid #307233;
+    display:flex;justify-content:center;align-items:center;font-weight:700;font-size:1.4rem;
+    color:#004d00;box-shadow:inset0 0 15px #8fcf8a,0 3px 7px #2d5e2a;cursor:pointer;
+    transition:background-color 0.35s,transform 0.35s;transform-style:preserve-3d;user-select:none;outline-offset:5px;}
+  .cell:hover:not(.selected):not(.wrong){background-color:#8ae07b;transform:rotateY(15deg) scale(1.15);
+    box-shadow:0 0 20px #30ff00;}
+  .cell.selected{background:#388e3c;color:#d4f7ca;box-shadow:0 0 20px #6df25a,0 0 32px #2cae35;
+    transform:scale(1.3);cursor:default;outline:none;}
+  .cell.wrong{animation:shake 0.5s ease;background:#ff6666;color:#540000;box-shadow:none;
+    transform:scale(1.24);cursor:default;outline:none;}
+  @keyframes shake{0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px) rotateZ(-7deg);}
+    50%{transform:translateX(6px) rotateZ(7deg);}
+    75%{transform:translateX(-6px) rotateZ(-7deg);}}
+  input[type="text"]{border-radius:7px;border:2px solid #189b5e;background:#d1ffdeaa;
+    padding:8px10px;font-size:1rem;margin:6px6px12px0;color:#0d3317;}
+  input[type="text"]:focus{border-color:#35e88c !important;box-shadow:0 0 10px #68f4ad;outline:none;}
+  .quiz-btns{display:flex;flex-direction:column;max-width:360px;margin:0 auto;gap:10px;}
+  .quiz-btns button{width:100%;text-align:left;}
+  .sortbin{width:100px;padding:12px;border-radius:12px;border:none;font-weight:700;}
+  #tree-svg{max-width:95vw;}
+  .celebrate{animation:celebrate1s ease-in-out;}
+  @keyframes celebrate{0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="background"></div>
+<div class="container" role="main" aria-label="Ten-stage sustainability interactive game">
+  <h1>Sustainability Quest</h1>
+  <div class="progress-track" aria-label="Game progress">
+    <span class="progress-bubble active" aria-current="step"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+    <span class="progress-bubble"></span>
+  </div>
+  <div id="content-area" aria-live="polite"></div>
+</div>
+<script>
+(function(){
+  const content = document.getElementById("content-area");
+  const bubbles = document.querySelectorAll(".progress-bubble");
+  const correctSnd = new Audio("https://cdn.pixabay.com/audio/2022/02/23/audio_116bfa8bf1.mp3");
+  const wrongSnd = new Audio("https://cdn.pixabay.com/audio/2022/02/23/audio_1179e93491.mp3");
+  function updateProgress(stage){
+    bubbles.forEach((b, i) => {
+      b.classList.toggle('active', i === stage);
+      b.classList.toggle('completed', i < stage);
+    });
+  }
+  const go = [stage1,stage2,stage3,stage4,stage5,stage6,stage7,stage8,stage9,stage10,endScreen];
+
+  function stage1(){
+    updateProgress(0);
+    const cols=6, rows=12, word="WATER";
+    const alphabets="BCDFGHJKLMNPQSVXYZ";
+    const chosenCol=2, startRow=3;
+    let gridData = [];
+    for(let r=0;r<rows;r++){
+      gridData[r] = [];
+      for(let c=0;c<cols;c++){
+        gridData[r][c] = '';
+      }
+    }
+    for(let i=0;i<word.length;i++){
+      gridData[startRow+i][chosenCol]=word.charAt(i);
+    }
+    for(let r=0; r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(gridData[r][c]===''){
+          gridData[r][c]=Math.random()<0.3?'':alphabets.charAt(Math.floor(Math.random()*alphabets.length));
+        }
+      }
+    }
+    content.innerHTML = `
+      <h2>Stage 1: Vertical Word Maze - Find the word!</h2>
+      <div class="maze" id="maze-grid" aria-label="Word maze"></div>
+      <div class="message" id="msg"></div>
+      <div class="fact-box" id="fact"></div>
+      <button id="nextBtn" disabled>Next Stage ➡️</button>
+    `;
+    const mazeGrid = document.getElementById('maze-grid'), msg = document.getElementById('msg'), fact = document.getElementById('fact'),
+    nextBtn = document.getElementById('nextBtn');
+    mazeGrid.style.gridTemplateColumns = `repeat(${cols},52px)`;
+    mazeGrid.style.gridTemplateRows = `repeat(${rows},52px)`;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        let cell=document.createElement('div');
+        cell.className='cell';
+        cell.textContent=gridData[r][c];
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        cell.tabIndex = gridData[r][c] ? 0 : -1;
+        mazeGrid.appendChild(cell);
+      }
+    }
+    let foundCount=0;
+    const facts = [
+      "💧 Water is vital - save every drop!",
+      "🌍 Water sustains ecosystems.",
+      "🌱 Reduce water waste; save energy.",
+      "🚰 Fix leaks promptly to keep water safe.",
+      "💚 Every drop saved helps our planet.",
+    ];
+    const letterPos = [];
+    for(let i=0; i<word.length; i++) letterPos.push({r:startRow+i, c:chosenCol});
+    function posEquals(a,b){return a.r===b.r&&a.c===b.c;}
+    function resetSelections(){
+      foundCount =0;
+      msg.textContent = "Select the letters vertically, in order!";
+      fact.textContent = "";
+      Array.from(mazeGrid.children).forEach(c=>{
+        c.classList.remove('selected','wrong');
+        c.style.boxShadow = '';
+        c.style.transform = '';
+      });
+      nextBtn.disabled = true;
+    }
+    mazeGrid.addEventListener('click', e=>{
+      const cell = e.target;
+      if(!cell.classList.contains('cell')||cell.classList.contains('selected')||cell.classList.contains('wrong')||cell.textContent==='') return;
+      const r = +cell.dataset.r, c = +cell.dataset.c;
+      if(!posEquals({r,c}, letterPos[foundCount])){
+        cell.classList.add('wrong');
+        msg.textContent = "⚠️ Wrong letter! Follow the vertical word order.";
+        fact.textContent = "";
+        wrongSnd.play();
+        setTimeout(()=>cell.classList.remove('wrong'),700);
+        return;
+      }
+      cell.classList.add('selected');
+      foundCount++;
+      msg.textContent = `Good! Letter '${cell.textContent}' (${foundCount}/${word.length})`;
+      fact.textContent = facts[foundCount-1];
+      correctSnd.play();
+      if(foundCount===word.length){
+        msg.textContent = `🎉 You found "${word}"!`;
+        fact.textContent = facts.join(' ');
+        nextBtn.disabled = false;
+        Array.from(mazeGrid.children).forEach(c=>{
+          c.style.boxShadow = "0 0 22px 7px #35ed6f, 0 0 33px 11px #13a837";
+          c.style.transform += " scale(1.35) rotateY(22deg)";
+        });
+      }
+    });
+    nextBtn.onclick = () => stage2();
+    resetSelections();
+  }
+
+  function stage2(){
+    updateProgress(1);
+    content.innerHTML = `
+      <h2>Stage 2: Eco Scavenger Hunt</h2>
+      <p>Type 3 eco-friendly items you use daily.</p>
+      <input id="item1" placeholder="Item 1" />
+      <input id="item2" placeholder="Item 2" />
+      <input id="item3" placeholder="Item 3" /><br>
+      <button id="submitBtn" disabled>Submit</button>
+      <div class="message" id="msg"></div>
+      <button id="nextBtn" style="display:none;">Next Stage ➡️</button>
+    `;
+    const i1 = document.getElementById('item1'), i2 = document.getElementById('item2'), i3 = document.getElementById('item3'),
+    btnSubmit = document.getElementById('submitBtn'), msg = document.getElementById('msg'), nextBtn = document.getElementById('nextBtn');
+    function checkInputs(){
+      btnSubmit.disabled = !(i1.value.trim() && i2.value.trim() && i3.value.trim());
+    }
+    [i1,i2,i3].forEach(i=>i.addEventListener('input', checkInputs));
+    btnSubmit.onclick = () => {
+      const items = [i1.value.trim(), i2.value.trim(), i3.value.trim()];
+      if(new Set(items).size <3){
+        msg.textContent = "Please enter three different items.";
+        msg.className = "message incorrect";
+        wrongSnd.play();
+        return;
+      }
+      msg.textContent = "Great choices! Every step counts.";
+      msg.className = "message correct";
+      correctSnd.play();
+      btnSubmit.style.display = "none";
+      nextBtn.style.display = "inline-block";
+    };
+    nextBtn.onclick = () => stage3();
+  }
+
+  function stage3(){
+    updateProgress(2);
+    const questions=[
+      {q:"Which activity saves the most water?",options:["Short shower","Watering daily","Washing full sink"],correct:0,fact:"Short showers use less water!"},
+      {q:"Which is renewable?",options:["Coal","Wind","Plastic"],correct:1,fact:"Wind is renewable energy."},
+      {q:"Best way to reduce plastic?",options:["Single-use bags","Reusable bottles","Burning waste"],correct:1,fact:"Reusable bottles reduce waste."}
+    ];
+    let idx=0,score=0;
+    content.innerHTML=`
+      <h2>Stage 3: Climate Quiz</h2>
+      <div id="q-text" style="font-size:1.1rem;margin-bottom:20px;"></div>
+      <div class="quiz-btns" id="q-options"></div>
+      <div class="message" id="q-msg"></div>
+      <button id="btn-next" hidden>Next Question ➡️</button>
+    `;
+    const qText=document.getElementById('q-text'), qOptions=document.getElementById('q-options'), qMsg=document.getElementById('q-msg'), btnNext=document.getElementById('btn-next');
+    function loadQ(){
+      btnNext.hidden=true; qMsg.textContent='';
+      qText.textContent=questions[idx].q;
+      qOptions.innerHTML='';
+      questions[idx].options.forEach((opt,i)=>{
+        const b=document.createElement('button');
+        b.textContent=opt;
+        b.onclick=()=>{
+          if(i===questions[idx].correct){
+            qMsg.textContent="Correct! "+questions[idx].fact;
+            qMsg.className="message correct";
+            score++;
+            correctSnd.play();
+          } else {
+            qMsg.textContent="Try again.";
+            qMsg.className="message incorrect";
+            wrongSnd.play();
+            return;
+          }
+          Array.from(qOptions.children).forEach(btn=>btn.disabled=true);
+          btnNext.hidden=false;
+        };
+        qOptions.appendChild(b);
+      });
+    }
+    btnNext.onclick=()=>{
+      idx++;
+      if(idx>=questions.length){
+        content.innerHTML=`
+          <h2>Stage 3 Complete! Your score: ${score}/${questions.length}</h2>
+          <button id="toStage4">Next Stage ➡️</button>
+        `;
+        document.getElementById('toStage4').onclick = () => stage4();
+      } else loadQ();
+    };
+    loadQ();
+  }
+
+  function stage4(){
+    updateProgress(3);
+    const scenarios=[
+      {text:"At a party: Disposable or reusable plates?",options:["Disposable","Reusable"],correct:1,fact:"Reusable plates reduce waste."},
+      {text:"Garden watering: Tap daily or rainwater?",options:["Tap water","Rainwater"],correct:1,fact:"Rainwater saves potable water."}
+    ];
+    let i=0;
+    content.innerHTML=`
+      <h2>Stage 4: Sustainability Decision Dilemma</h2>
+      <div id="scenario-text" style="font-size:1.1rem; margin:20px 0;"></div>
+      <div id="scenario-options" style="display:flex; flex-direction: column;max-width:360px; margin:auto; gap:10px;"></div>
+      <div class="message" id="scenario-msg"></div>
+      <button id="btn-next-scenario" hidden>Next Scenario ➡️</button>
+    `;
+    const scenarioText=document.getElementById("scenario-text"), scenarioOptions=document.getElementById("scenario-options"),
+    scenarioMsg=document.getElementById("scenario-msg"), btnNextScenario=document.getElementById("btn-next-scenario");
+    function loadScenario(){
+      scenarioMsg.textContent="";
+      scenarioText.textContent = scenarios[i].text;
+      scenarioOptions.innerHTML = '';
+      btnNextScenario.hidden = true;
+      scenarios[i].options.forEach((opt, j)=>{
+        const b=document.createElement('button');
+        b.textContent=opt;
+        b.onclick=()=>{
+          if(j === scenarios[i].correct){
+            scenarioMsg.textContent = scenarios[i].fact;
+            scenarioMsg.className = "message correct";
+            correctSnd.play();
+            Array.from(scenarioOptions.children).forEach(btn=>btn.disabled=true);
+            btnNextScenario.hidden=false;
+          } else {
+            scenarioMsg.textContent = "Think greener!";
+            scenarioMsg.className = "message incorrect";
+            wrongSnd.play();
+          }
+        };
+        scenarioOptions.appendChild(b);
+      });
+    }
+    btnNextScenario.onclick=()=>{
+      i++;
+      if(i>=scenarios.length){
+        stage5();
+      } else loadScenario();
+    };
+    loadScenario();
+  }
+
+  function stage5() {
+    updateProgress(4);
+    content.innerHTML = `
+      <h2>Stage 5: Eco-Charade Drawing</h2>
+      <p>Draw a sustainability action and share with friends!</p>
+      <canvas id="drawCanvas" width="330" height="180" style="touch-action:none;"></canvas>
+      <div style="text-align:center; margin-top:10px;">
+        <button id="clearDraw">Clear</button>
+        <button id="nextBtn" disabled>Next Stage ➡️</button>
+      </div>
+      <div class="message" id="drawMsg"></div>`;
+    const canvas = document.getElementById("drawCanvas"),
+    ctx = canvas.getContext("2d"),
+    nextBtn = document.getElementById("nextBtn"),
+    clearBtn = document.getElementById("clearDraw"),
+    drawMsg = document.getElementById("drawMsg");
+    ctx.lineWidth =3; ctx.lineCap = "round"; ctx.strokeStyle = "#2e7d32";
+    let drawing = false;
+
+    function getPos(e){
+      if(e.touches) {
+        const rect = canvas.getBoundingClientRect();
+        return {x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      } else {
+        return {x:e.offsetX, y:e.offsetY};
+      }
+    }
+    function startDraw(e){
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+    function moveDraw(e){
+      if(!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      if(nextBtn.disabled) nextBtn.disabled = false;
+    }
+    function endDraw(){ drawing = false; }
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', function(e){e.preventDefault();startDraw(e);});
+    canvas.addEventListener('touchmove', function(e){e.preventDefault();moveDraw(e);});
+    canvas.addEventListener('touchend', function(e){e.preventDefault();endDraw();});
+    canvas.addEventListener('touchcancel', function(e){endDraw();});
+    clearBtn.onclick=()=>{
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawMsg.textContent="";
+      nextBtn.disabled = true;
+    };
+    nextBtn.onclick = () => { stage6(); };
+  }
+
+  function stage6(){
+    updateProgress(5);
+    const items=[
+      {name:"Plastic Bottle",cat:"Recycle"},
+      {name:"Banana Peel",cat:"Compost"},
+      {name:"Old Battery",cat:"Hazard"},
+      {name:"Newspaper",cat:"Recycle"},
+      {name:"Tea Bag",cat:"Compost"}
+    ];
+    const categories=["Recycle","Compost","Hazard"];
+    let sorted =0;
+    content.innerHTML=`
+      <h2>Stage 6: Sort the Waste!</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;max-width:350px;margin:0 auto20px;">
+        ${items.map((i,ix)=>`<div class="dragitem" draggable="true" id="drag${ix}" style="padding:10px;background:#a4db91;border-radius:10px;cursor:grab;">${i.name}</div>`).join("")}
+      </div>
+      <div style="display:flex;justify-content:space-around;max-width:400px;margin:0 auto;">
+        ${categories.map(cat=>`<div class="dropzone" data-cat="${cat}" style="width:100px;height:100px;padding:10px;border:2px dashed #7fca6c;border-radius:15px;color:#317622;text-align:center;">${cat}</div>`).join("")}
+      </div>
+      <div class="message" id="msg"></div>
+      <button id="nextBtn" disabled>Next Stage ➡️</button>
+    `;
+    const dragItems=document.querySelectorAll(".dragitem"),
+    dropzones=document.querySelectorAll(".dropzone"),
+    msg=document.getElementById("msg"),
+    nextBtn=document.getElementById("nextBtn");
+    dragItems.forEach(item=>{
+      item.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",e.target.id));
+    });
+    dropzones.forEach(zone=>{
+      zone.addEventListener("dragover",e=>{e.preventDefault();zone.style.backgroundColor="#ddf2d8";});
+      zone.addEventListener("dragleave",e=>{zone.style.backgroundColor="";});
+      zone.addEventListener("drop",e=>{
+        e.preventDefault();
+        zone.style.backgroundColor="";
+        let id=e.dataTransfer.getData("text/plain");
+        let elem=document.getElementById(id);
+        let cat=zone.dataset.cat;
+        let item=items[id.replace("drag","")];
+        if(item.cat===cat){
+          zone.appendChild(elem);
+          elem.style.cursor="default";
+          elem.draggable=false;
+          sorted++;
+          msg.textContent=`Correct! ${sorted}/${items.length} sorted.`;
+          msg.className="message correct";
+          correctSnd.play();
+          if(sorted===items.length)nextBtn.disabled=false;
+        }else{
+          msg.textContent="Try the correct bin!";
+          msg.className="message incorrect";
+          wrongSnd.play();
+        }
+      });
+    });
+    nextBtn.onclick=()=>stage7();
+  }
+
+  function stage7() {
+    updateProgress(6);
+    content.innerHTML = `
+      <h2>Stage 7: Virtual Planting — Grow a Tree</h2>
+      <div style="text-align:center;margin-bottom:7px;">
+        <span id="plant-progress" style="font-size:1.1rem;">Let's start by digging a hole.</span>
+      </div>
+      <div id="plant-visuals" style="text-align:center;padding-top:14px;padding-bottom:12px;min-height:220px;">
+        <svg id="tree-svg" width="170" height="200" style="max-width:95vw;">
+          <rect x="18" y="160" width="135" height="25" rx="8" fill="#cdb897"/>
+          <ellipse id="soil" cx="85" cy="160" rx="46" ry="16" fill="#835b2f"/>
+          <ellipse id="hole" cx="85" cy="160" rx="0" ry="0" fill="#51412b"/>
+          <rect id="trunk" x="80" y="115" width="10" height="52" rx="4" fill="#7c5e37" opacity="0"/>
+          <ellipse id="leaves" cx="85" cy="110" rx="0" ry="0" fill="#53c573" opacity="0"/>
+          <ellipse id="waterdrop" cx="85" cy="95" rx="0" ry="0" fill="#41aaff" opacity="0.7"/>
+        </svg>
+      </div>
+      <div style="text-align:center;">
+        <button id="plant-action" class="plantbtn" style="min-width:110px;">Dig Hole</button>
+      </div>
+      <div class="fact-box" id="plant-fact"></div>
+      <button id="nextBtn" style="display:none;">Next Stage ➡️</button>
+    `;
+
+    const progressText = document.getElementById('plant-progress'),
+    treeSVG = document.getElementById('tree-svg'),
+    hole = document.getElementById('hole'),
+    trunk = document.getElementById('trunk'),
+    leaves = document.getElementById('leaves'),
+    waterdrop = document.getElementById('waterdrop'),
+    actionBtn = document.getElementById('plant-action'),
+    factBox = document.getElementById('plant-fact'),
+    nextBtn = document.getElementById('nextBtn');
+
+    let stage =0, digCount =0, plantCount =0, waterCount =0;
+    const maxDig =3, maxPlant =3, maxWater =3;
+
+    function updateVisuals() {
+      if (stage ===0) {
+        hole.setAttribute("rx",10 +12*digCount);
+        hole.setAttribute("ry",2 +5*digCount);
+      }
+      if (stage >0) {
+        trunk.setAttribute("opacity", "1");
+        trunk.setAttribute("y", (150 -10*plantCount));
+        trunk.setAttribute("height", (17 +13*plantCount));
+        hole.setAttribute("rx",34 - plantCount*3);
+        hole.setAttribute("ry",17 - plantCount*2);
+      }
+      if (stage ===2) {
+        waterdrop.setAttribute("rx",7*Math.min(1,waterCount/1.3));
+        waterdrop.setAttribute("ry",16*Math.min(1,waterCount/3));
+        waterdrop.setAttribute("cy",140-4*waterCount);
+        waterdrop.setAttribute("opacity",0.38+0.19*waterCount);
+      } else {
+        waterdrop.setAttribute("rx",0); waterdrop.setAttribute("ry",0);
+      }
+      if (stage===3) {
+        leaves.setAttribute("opacity", "1");
+        leaves.setAttribute("rx", "44");
+        leaves.setAttribute("ry", "48");
+      }
+    }
+
+    function nextAction() {
+      if (stage ===0) {
+        digCount++;
+        updateVisuals();
+        factBox.textContent = [
+          "Trees help prevent soil erosion.", 
+          "Digging lets roots grow deep for strong trees!",
+          "Well-dug soil helps trees get nutrients."
+        ][digCount-1]||"";
+        if (digCount >= maxDig) {
+          stage =1; progressText.textContent = "Time to plant the sapling!";
+          actionBtn.textContent = "Plant Sapling";
+          factBox.textContent = "Saplings need space to root!";
+        } else {
+          progressText.textContent = `Digging... (${digCount}/${maxDig})`;
+        }
+      } else if (stage ===1) {
+        plantCount++;
+        updateVisuals();
+        factBox.textContent = [
+          "Each new tree brings us cleaner air!",
+          "Saplings are delicate—plant gently.",
+          "Young saplings need care."
+        ][plantCount-1]||"";
+        if (plantCount >= maxPlant) {
+          stage =2; progressText.textContent = "Now water the sapling!";
+          actionBtn.textContent = "Water Sapling";
+          factBox.textContent = "Water helps the roots grow and thrive.";
+        } else {
+          progressText.textContent = `Planting... (${plantCount}/${maxPlant})`;
+        }
+      } else if (stage ===2) {
+        waterCount++;
+        updateVisuals();
+        factBox.textContent = [
+          "Water daily for the first weeks.",
+          "Hydration helps trees grow tall.",
+          "Healthy trees need regular watering."
+        ][waterCount-1]||"";
+        if (waterCount >= maxWater) {
+          stage =3;
+          progressText.textContent = "Congratulations! Your tree is growing!";
+          actionBtn.style.display = "none";
+          factBox.textContent = "Shade, clean air, rain, and homes for birds—all thanks to trees!";
+          leaves.setAttribute("opacity", "1");
+          leaves.setAttribute("rx", "44");
+          leaves.setAttribute("ry", "48");
+          nextBtn.style.display = "inline-block";
+        } else {
+          progressText.textContent = `Watering... (${waterCount}/${maxWater})`
+        }
+      }
+    }
+    actionBtn.onclick = nextAction;
+    nextBtn.onclick = ()=>stage8();
+    updateVisuals();
+  }
+
+  function stage8(){
+    updateProgress(7);
+    content.innerHTML=`
+      <h2>Stage 8: Carbon Footprint Slider</h2>
+      <label for="slider">Estimate CO₂ saved by biking10km (kg):</label>
+      <input type="range" min="0" max="5" step="0.1" value="2.5" id="slider" style="width:100%; margin:10px0;">
+      <div id="val" style="text-align:center;font-size:1.3rem;">2.5 kg</div>
+      <div class="message" id="msg"></div>
+      <button id="submitBtn">Submit</button>
+      <button id="nextBtn" style="display:none;">Next Stage ➡️</button>
+    `;
+    const slider=document.getElementById('slider'),val=document.getElementById('val'),
+    btnSubmit=document.getElementById('submitBtn'),btnNext=document.getElementById('nextBtn'),
+    msg=document.getElementById('msg');
+    slider.oninput=()=>val.textContent=slider.value+" kg";
+    btnSubmit.onclick=()=>{
+      const v=parseFloat(slider.value);
+      if(v>=2&&v<=3.5){
+        msg.textContent="Correct! Biking10km saves ~2.5-3 kg CO₂.";msg.className="message correct";
+        correctSnd.play();btnNext.style.display="inline-block";btnSubmit.disabled=true;
+      } else {
+        msg.textContent="Try value between2 and3.5 kg.";msg.className="message incorrect";
+        wrongSnd.play();
+      }
+    };
+    btnNext.onclick=()=>stage9();
+  }
+
+  function stage9(){
+    updateProgress(8);
+    const qlist=[
+      {items:["Cloth Bag","Poly Bag"],correct:0,fact:"Cloth bags are reusable and eco-friendly."},
+      {items:["LED Bulb","Incandescent Bulb"],correct:0,fact:"LED bulbs save up to80% energy."}
+    ];
+    let i=0;
+    content.innerHTML=`
+      <h2>Stage 9: Compare Eco Products</h2>
+      <div id="items" style="max-width:360px;margin:0 auto;"></div>
+      <div class="message" id="msg"></div>
+      <button id="nextBtn" style="display:none;">Next Stage ➡️</button>
+    `;
+    const itemsDiv=document.getElementById("items"),msg=document.getElementById("msg"),btnNext=document.getElementById("nextBtn");
+    function load() {
+      itemsDiv.innerHTML=qlist[i].items.map((item,ix)=>`<div style="background:#9fe0a6;padding:10px;margin:5px;border-radius:10px;cursor:pointer;" data-ix="${ix}">${item}</div>`).join("");
+      msg.textContent="Which product is more sustainable?";btnNext.style.display="none";
+      Array.from(itemsDiv.children).forEach(div=>div.onclick=()=>{
+        if(+div.dataset.ix===qlist[i].correct){
+          msg.textContent="Correct! "+qlist[i].fact;msg.className="message correct";correctSnd.play();Array.from(itemsDiv.children).forEach(b=>b.style.pointerEvents="none");
+          btnNext.style.display="inline-block";
+        } else { msg.textContent="Try again! Think eco-friendly."; msg.className="message incorrect"; wrongSnd.play(); }
+      });
+    }
+    btnNext.onclick=()=>{i++;if(i>=qlist.length)stage10();else load();}; load();
+  }
+
+  function stage10(){
+    updateProgress(9);
+    content.innerHTML=`
+      <h2>Stage 10: True/False Quiz</h2>
+      <div id="tfQuestion" style="font-size:1.2rem;margin-bottom:20px;"></div>
+      <div style="text-align:center; margin-bottom:20px;">
+        <button id="btnTrue" style="margin-right:20px;">True</button>
+        <button id="btnFalse">False</button>
+      </div>
+      <div class="message" id="msg"></div>
+      <button id="nextBtn" style="display:none;">Finish Game 🎉</button>
+    `;
+    const tfQuestion=document.getElementById("tfQuestion"), btnTrue=document.getElementById("btnTrue"),
+    btnFalse=document.getElementById("btnFalse"),msg=document.getElementById("msg"),btnNext=document.getElementById("nextBtn");
+    const questions=[
+      {q:"Eating local produce cuts carbon footprint.",ans:true},
+      {q:"Throwing plastic in compost is okay.",ans:false}
+    ];
+    let idx=0;
+    function ask() {
+      btnNext.style.display="none"; tfQuestion.textContent=questions[idx].q;
+      msg.textContent=""; btnTrue.disabled=false; btnFalse.disabled=false;
+    }
+    btnTrue.onclick=()=>answer(true);
+    btnFalse.onclick=()=>answer(false);
+    function answer(val){
+      if(val===questions[idx].ans){
+        msg.textContent="Correct!";msg.className="message correct";correctSnd.play();
+        btnTrue.disabled=true;btnFalse.disabled=true;btnNext.style.display="inline-block";
+      }else{
+        msg.textContent="Try again.";msg.className="message incorrect";wrongSnd.play();
+      }
+    }
+    btnNext.onclick=()=>{
+      idx++;
+      if(idx>=questions.length)endScreen();else ask();
+    };
+    ask();
+  }
+
+  function endScreen(){
+    updateProgress(10);
+    content.innerHTML=`
+      <h2 style="text-align:center;">🎉 Congratulations! You completed the Sustainability Quest!</h2>
+      <p style="text-align:center;">Thank you for learning and caring for our planet.</p>
+      <div style="text-align:center; margin-top:20px;">
+        <button onclick="location.reload()">Play Again 🔄</button>
+      </div>
+    `;
+    bubbles.forEach((b) => b.classList.add('completed'));
+  }
+
+  stage1();
+})();
+</script>
+</body>
+</html>
